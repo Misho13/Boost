@@ -106,6 +106,7 @@ int main()
 #include <cmath>
 
 using namespace boost;
+
 optional<int> get_even_random_number() 
 {  
   int i = std::rand();  
@@ -115,7 +116,7 @@ optional<int> get_even_random_number()
 int main()
 {  
   std::srand(static_cast<unsigned int>(std::time(0)));  
-  optional<int> i = get_even_random_number(); 
+o  optional<int> i = get_even_random_number(); 
   double d = get_optional_value_or(i, 0);  
   std::cout << std::sqrt(d) << '\n'; 
 }
@@ -147,12 +148,39 @@ int main()
 } 
 ```
 
+Для использования **`boost::any`**, включите заголовочный файл ***boost/any.hpp***. Затем объекты типа **`boost.any`** могут быть созданы для хранения произвольных данных. В [примере 23.1](#example231) переменная является сначала ***int***, потом ***double***, а затем ***bool***.
 
+<a name="example232"></a>
+`Пример 23.2. Хранение string в boost::any`
+```c++
+#include <boost/any.hpp> 
+#include <string>
+int main() 
+{  
+  boost::any a = std::string{"Boost"}; 
+} 
+```
 
+Для доступа к значению **`boost::any`** переменных, используйте **`boost::any_cast`** оператор cast (см. [Пример 23.3](#example233))
 
+<a name="example232"></a>
+`Пример 23.3Доступ к значениям при помощи boost::any_cast`
+```c++ 
+#include <boost/any.hpp> 
+#include <iostream>
 
+int main() 
+{  
+	boost::any a = 1;  
+	std::cout << boost::any_cast<int>(a) << '\n';  
+	a = 3.14;  
+	std::cout << boost::any_cast<double>(a) << '\n';  
+	a = true;  
+	std::cout << std::boolalpha << boost::any_cast<bool>(a) << '\n'; 
+} 
+```
 
-
+Путем передачи соответствующего типа в качестве параметра шаблона в **`boost::any_cast`**, преобразуется значение переменной. Если указан недопустимый тип, создается исключение типа **`boost::bad_any_cast`**.
 <a name="Boost.Variant"></a>
 ##Глава №24 Boost.Variant
 <a name="Boost.PropertyTree"></a>
