@@ -26,8 +26,7 @@ int main()
 {  
 std::srand(static_cast<unsigned int>(std::time(0)));  
 int i = get_even_random_number();  
-if (i != -1)    
-std::cout << std::sqrt(static_cast<float>(i)) << '\n'; 
+if (i != -1)    std::cout << std::sqrt(static_cast<float>(i)) << '\n'; 
 }
 ```
 [Пример 21.1](#example211) использует функцию **`get_even_random_number()`**, которая должна возвращать четное случайное число. Она делает это довольно примитивным образом, вызывая функцию **`std::rand()`** из стандартной библиотеки. Если **`std::rand()`** генерирует четное случайное число, это число возвращается функцией **`get_even_random_number()`**. Если сгенерированное случайное число нечетное, то возвращается -1.
@@ -66,7 +65,69 @@ if (i)    std::cout << std::sqrt(static_cast<float>(*i)) << '\n';
 
 Если **`get_even_random_number()`** генерирует четное случайное число, значение возвращается напрямую, автоматически переведенное в объект типа **`boost::optional <int>`**, потому что **`boost::optional`** предоставляет неисключительнsq конструктор. Если **`get_even_random_number()`** не создает четное случайное число, возвращается пустой объект типа **`boost::optional <int>`**. Возвращаемое значение создается с помощью вызова конструктора по умолчанию.
 
-**`main()`** проверяет, пуст ли он. Если не пуст, то номер, хранящийся в ***i*** осуществляется оператором **`Boost::Optional`**, который работает как указатель. Однако, вы не должны думать, что **`boost::optional`** является указателем, потому что, например, значения в **`boost::optional`** копируются конструктором копирования в то время, как указатель не копирует значение, на которое указывает.
+**`main()`** проверяет, пуст ли он. Если не пуст, то номер, хранящийся в ***i*** осуществляется оператором **`boost::optional`**, который работает как указатель. Однако, вы не должны думать, что **`boost::optional`** является указателем, потому что, например, значения в **`boost::optional`** копируются конструктором копирования в то время, как указатель не копирует значение, на которое указывает.
+
+<a name="example213"></a>
+`Пример 21.3. Другие полезные функции-члены boost::optional`
+```c++
+#include <boost/optional.hpp> 
+#include <iostream> 
+#include <cstdlib> 
+#include <ctime> 
+#include <cmath>
+
+using boost::optional;
+
+optional<int> get_even_random_number() 
+{
+  int i = std::rand();  
+  return optional<int>{i % 2 == 0, i}; 
+}
+
+int main() 
+{  
+  std::srand(static_cast<unsigned int>(std::time(0)));  
+  optional<int> i = get_even_random_number();  
+  if (i.is_initialized())    std::cout << std::sqrt(static_cast<float>(i.get())) << '\n'; 
+}
+```
+
+[Пример 21.3](#example213) представляет другие полезные члены функции **`boost::optional`**. Этот класс предоставляет специальный конструктор, который принимает условие как первый параметр. Если у словие имеет значение ***true***, объект типа **`boost::optional`** инициализируется со вторым параметром. Если условие имеет значение ***false***, создается пустой объект типа **`boost::optional`**.[Пример 21.3](#example213) использует этот конструктор в функции **`get_even_random_number()`**.
+
+С **`is_initialized()`** вы можете проверить, является ли объект типа **`boost::optional`** пустым. Boost.Optional говорит о том, инициализированн или неинициализированн ли объект имени функции-члена **`is_initialized()`**. Функция **`get()`** член является эквивалентом **`operator*`**.
+
+<a name="example214"></a>
+`Пример 21.4. Различные вспомогательные функции Boost.Optional`
+```c++
+#include <boost/optional.hpp> 
+#include <iostream> 
+#include <cstdlib> 
+#include <ctime> 
+#include <cmath>
+
+using namespace boost;
+optional<int> get_even_random_number() 
+{  
+  int i = std::rand();  
+  return make_optional(i % 2 == 0, i); 
+}
+
+int main()
+{  
+  std::srand(static_cast<unsigned int>(std::time(0)));  
+  optional<int> i = get_even_random_number(); 
+  double d = get_optional_value_or(i, 0);  
+  std::cout << std::sqrt(d) << '\n'; 
+}
+```
+
+Boost.Optional предоставляет бесплатные постоянные вспомогательные функции, такие как **`boost:: make_optional()`** и **`boost:: get_optional_value_or()`** (см. [Пример 21.4](#example214)). **`boost:: make_optional()`** может быть вызван для создания объекта типа **`boost::optional`**. По умолчанию значение, возвращаемое при **`boost::optional`** пустое, но можно вызвать **`boost::get_optional_value_or()`**.
+
+Функция **`boost:: get_optional_value_or()`** также предоставляется в качестве функциичлена **`boost::optional`**. Ee название - **`get_value_or()`**.
+
+Наряду с ***boost/optional/optional_io.hpp*** Boost.Optional предоставляет файл заголовка с перегруженными потоками операторов, которые позволяют записывать объекты типа **`boost::optional`**, например, в стандартный вывод.
+
+
 ##Глава №23 Boost.Any
 ##Глава №24 Boost.Variant
 ##Глава №25 Boost.PropertyTree
