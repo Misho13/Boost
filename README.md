@@ -100,7 +100,8 @@ int main()
 <a name="example214"></a>
 `Пример 21.4. Различные вспомогательные функции Boost.Optional`
 ```c++
-#include <boost/optional.hpp> #include <iostream> 
+#include <boost/optional.hpp> 
+#include <iostream> 
 #include <cstdlib> 
 #include <ctime> 
 #include <cmath>
@@ -149,7 +150,9 @@ int main()
 `Пример 23.2. Хранение string в boost::any`
 ```c++
 #include <boost/any.hpp> 
-#include <string>int main() 
+#include <string>int 
+
+main() 
 {  
   boost::any a = std::string{"Boost"}; 
 } 
@@ -159,7 +162,8 @@ int main()
 
 <a name="example233"></a>
 `Пример 23.3. Доступ к значениям при помощи boost::any_cast`
-```c++ `#include <boost/any.hpp> 
+```c++ 
+#include <boost/any.hpp> 
 #include <iostream>
 
 int main() 
