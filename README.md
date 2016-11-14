@@ -204,6 +204,44 @@ int main()
 Поскольку **`boost::bad_any_cast`** является производным от **`std::bad_cast`**, ***catch*** обработчики могут перехватывать исключения этого типа. 
 
 Чтобы проверить, содержит ли переменная типа **`boost::any`** информацию, используйте функцию **`empty()`**. Чтобы проверить тип хранимой информации, используйте функцию **`type()`**.
+
+<a name="example235"></a>
+`Пример 23.5. Проверка типа хранимого значения`
+```c++
+#include <boost/any.hpp> 
+#include <typeinfo> 
+#include <iostream>
+
+int main() 
+{  
+boost::any a = 1;  
+if (!a.empty())  
+  {    
+    const std::type_info &ti = a.type();    
+    std::cout << ti.name() << '\n';  
+  } 
+}
+```
+
+[Пример 23.5](#example235) использует **`empty()`** и **`type()`**. В то время как **`empty()`** возвращает логическое значение, возвращаемое значение **`type()`** имеет тип **`std::type_info`**, который определяется в заголовочном файле ***typeinfo***.
+
+[Пример 23.6](#example236) показывает, как получить указатель на значение, хранящееся в переменной **`boost::any`** с помощью **`boost::any_cast`**.
+
+<a name="example236"></a>
+`Пример 23.6. Доступ к значениям через указатель`
+```c++
+#include <boost/any.hpp> 
+#include <iostream>
+
+int main() 
+{
+  boost::any a = 1;  
+  int *i = boost::any_cast<int>(&a);  
+  std::cout << *i << '\n'; 
+} 
+```
+
+Вы просто передаете указатель на переменную **`boost::any`** для **`boost::any_cast`**; параметр шаблона останется неизменным.
 <a name="Boost.Variant"></a>
 ##Глава №24 Boost.Variant
 <a name="Boost.PropertyTree"></a>
