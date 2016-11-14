@@ -1,12 +1,12 @@
 #Boost 
 ##Содержание 
-- [Глава №21](##Глава-№21-Boost.Optional)
+- [Глава №21](Boost.Optional)
 - [Глава №23](##Глава-№23-Boost.Any)
 - [Глава №24](##Глава-№24-Boost.Variant)
 - [Глава №25](##Глава-№25-Boost.PropertyTree)
 - [Глава №27](##Глава-№27-Boost.Tribool)
 
-
+<a name="Boost.Optional"></a>
 ##Глава №21 Boost.Optional
 Библиотека [Boost.Optional](http://www.boost.org/doc/libs/1_62_0/libs/optional/doc/html/index.html)  предоставляет класc **`boost::optional`**, который может быть использован для дополнительных возвращаемых значений. Эти возвращаемые значения функций могут не всегда возвращать результат. [Пример 21.1](#example211) показывает, как необязательные возвращаемые значения обычно реализуются без Boost.Optional. 
 
