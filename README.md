@@ -242,8 +242,140 @@ int main()
 ```
 
 Вы просто передаете указатель на переменную **`boost::any`** для **`boost::any_cast`**; параметр шаблона останется неизменным.
+
 <a name="Boost.Variant"></a>
 ##Глава №24 Boost.Variant
+
+[Boost.Variant](http://www.boost.org/doc/libs/1_62_0/doc/html/variant.html) предоставляет класс с именем **`boost::variant`**, который напоминает союз. Значения различных типов можно хранить в переменной **`boost::variant`**.В один момент можно хранить только одно значение. При создании нового значения, старое значение перезаписывается. Но новое значение может иметь другой тип отличного от прежнего. Единственное требование заключается в том, чтобы типы значений были переданы в качестве параметров шаблона **`boost::variant`**, также известны, как **`boost::variant variable`**.
+
+**`bost::variant`** поддерживает любой тип значения. Например, можно хранить **`std::string`** в **`boost::variant variable`**, хотя это было не возможно до ***C++ 11***. В ***C++ 11*** были смягчены требования к слиянию. В настоящее время слияние может содержать **`std::string`**. Поскольку **`std::string`** должен быть инициализирован с новым размещением и должен быть уничтожен в результате явного вызова деструктора, все еще может иметь смысл использовать **`boost::variant`**, даже в среде разработки ***C++ 11***. 
+
+<a name="example241"></a>
+`Пример 24.1. Использование boost::variant `
+```c++
+#include <boost/variant.hpp> 
+#include <string>
+
+int main() 
+{  
+  boost::variant<double, char, std::string> v;  
+  v = 3.14;  
+  v = 'A';  
+  v = "Boost"; 
+}
+```
+# Опять Косяк 
+<a name="example242"></a>
+`Пример  24.2.`
+```c++
+#include <boost/variant.hpp>
+#include <string>
+#include <iostream>
+
+int main()
+{
+  boost::variant<double, char, std::string> v;
+  v = 3.14;
+  std::cout << boost::get<double>(v) << '\n';
+  v = 'A';
+  std::cout << boost::get<char>(v) << '\n';
+  v = "Boost";
+  std::cout << boost::get<std::string>(v) << '\n';
+}
+```
+Чтобы отобразить сохраненные значения v, используйте свободно стоящую функцию **`boost:: get()`** (см. [Пример 24.2](#example242)).
+
+**`boost::get()`** ожидает один из типов переменной, допустимой для соответствующей переменной как параметр шаблона. Указание недопустимого типа приведет к ошибке во время выполнения, так как не происходит проверка типов во время компиляции. 
+
+Переменные типа **`boost::variant`** могут быть написаны для потоков, таких, как стандартный выходной поток, минуя опасность ошибки времени выполнения (см. [Примем 24.3](#example243)).
+
+<a name="example243"></a>
+`Пример 24.3. Прямой выход из boost::variant в потоке `
+```c++
+include <boost/variant.hpp>
+#include <string>
+#include <iostream>
+
+int main()
+{
+  boost::variant<double, char, std::string> v;
+  v = 3.14;
+  std::cout << v << '\n';
+  v = 'A';
+  std::cout << v << '\n';
+  v = "Boost";
+  std::cout << v << '\n';
+}
+```
+
+Для безопасных типов доступа Boost.Variant предоставляет функцию с именем **`boost::apply_visitor()`**.
+
+<a name="example244"></a>
+`Example 24.4. Использование visitor для boost::variant`
+```c++
+#include <boost/variant.hpp>
+#include <string>
+#include <iostream>
+
+struct output : public boost::static_visitor<>
+{
+  void operator()(double d) const { std::cout << d << '\n'; }
+  void operator()(char c) const { std::cout << c << '\n'; }
+  void operator()(std::string s) const { std::cout << s << '\n'; }
+};
+
+int main()
+{
+  boost::variant<double, char, std::string> v;
+  v = 3.14;
+  boost::apply_visitor(output{}, v);
+  v = 'A';
+  boost::apply_visitor(output{}, v);
+  v = "Boost";
+  boost::apply_visitor(output{}, v);
+}
+```
+
+Как первый параметр, **`boost:: apply_visitor()`**  ожидает объект класса, производного от **`boost::static_visitor`**. Этот класс должен перегружать **`operator()`** для каждого типа переменной, используемой **`boost::variant`**, на которую она действует. Следовательно, оператор перегружен три раза в [Примере 24.4](#example244),  поскольку ***v*** поддерживает типы ***double***, ***char*** и ***string***.
+
+**`boost::static_visitor`** является шаблоном. Тип возвращаемого значения **`operator()`** должен быть указан в качестве параметра шаблона. Если оператор не имеет возвращаемого значения, параметр шаблона не является обязательным, как показано в примере. 
+
+Второй параметр, передаваемый для **`boost:: apply_visitor()`** является переменной **`boost::variant`**. 
+
+**`boost::apply_visitor()`** автоматически вызывает **`operator()`** для первого параметра, который сравнивает тип значения, хранящегося во втором параметре. Это означает, что демонстрационная программа использует различные перегруженные операторы каждый раз, когда вызывается **`boost:: apply_visitor()`** – сначала ***double***,затем ***char*** и, наконец для ***string***. 
+
+Преимуществом **`boost::apply_visitor()`** является не только правильный оператор, вызывающийся автоматически. Еще  **`boost::apply_visitor()`** гарантирует,что перегруженные операторы были предоставлены для каждого типа, поддерживаемого **`boost::variant`** переменных. Если один из трех перегруженных операторов не определен, код не может быть скомпилирован.
+
+Если перегруженные операторы являются эквивалентными в функциональности, код можно упростить с помощью шаблона (см. [Пример 24.5](#example245)).
+
+<a name="example245"></a>
+`Пример 24.5Использование visitor с шаблонной функцией для boost::variant`
+```c++
+#include <boost/variant.hpp>
+#include <string>
+#include <iostream>
+
+struct output : public boost::static_visitor<>
+{
+  template <typename T>
+  void operator()(T t) const { std::cout << t << '\n'; }
+};
+
+int main()
+{
+  boost::variant<double, char, std::string> v;
+  v = 3.14;
+  boost::apply_visitor(output{}, v);
+  v = 'A';
+  boost::apply_visitor(output{}, v);
+  v = "Boost";
+  boost::apply_visitor(output{}, v);
+}
+```
+
+Так как **`boost::apply_visitor()`** гарантирует правильность кода во время компиляции, он предпочтительней **`boost::get()`**. 
+
+
 <a name="Boost.PropertyTree"></a>
 ##Глава №25 Boost.PropertyTree
 <a name="Boost.Tribool"></a>
