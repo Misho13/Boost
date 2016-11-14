@@ -20,13 +20,14 @@
 
 int get_even_random_number() 
 {  
-int i = std::rand();  return (i % 2 == 0) ? i : -1; 
+  int i = std::rand();  
+  return (i % 2 == 0) ? i : -1; 
 } 
 int main() 
 {  
-std::srand(static_cast<unsigned int>(std::time(0)));  
-int i = get_even_random_number();  
-if (i != -1)    std::cout << std::sqrt(static_cast<float>(i)) << '\n'; 
+  std::srand(static_cast<unsigned int>(std::time(0)));  
+  int i = get_even_random_number();  
+  if (i != -1)    std::cout << std::sqrt(static_cast<float>(i)) << '\n'; 
 }
 ```
 [Пример 21.1](#example211) использует функцию **`get_even_random_number()`**, которая должна возвращать четное случайное число. Она делает это довольно примитивным образом, вызывая функцию **`std::rand()`** из стандартной библиотеки. Если **`std::rand()`** генерирует четное случайное число, это число возвращается функцией **`get_even_random_number()`**. Если сгенерированное случайное число нечетное, то возвращается -1.
@@ -49,15 +50,15 @@ using boost::optional;
 
 optional<int> get_even_random_number() 
 {  
-int i = std::rand();  
-return (i % 2 == 0) ? i : optional<int>{}; 
+  int i = std::rand();  
+  return (i % 2 == 0) ? i : optional<int>{}; 
 } 
 
 int main() 
 {  
-std::srand(static_cast<unsigned int>(std::time(0)));  
-optional<int> i = get_even_random_number();  
-if (i)    std::cout << std::sqrt(static_cast<float>(*i)) << '\n'; 
+  std::srand(static_cast<unsigned int>(std::time(0)));  
+  optional<int> i = get_even_random_number();  
+  if (i)    std::cout << std::sqrt(static_cast<float>(*i)) << '\n'; 
 }
 ```
 
