@@ -378,6 +378,109 @@ int main()
 
 <a name="Boost.PropertyTree"></a>
 ##Глава №25 Boost.PropertyTree
+
+**`boost::property_tree::ptree`** класса [Boost.PropertyTree](http://www.boost.org/doc/libs/1_62_0/doc/html/property_tree.html) предоставляет древовидную структуру для хранения пар ключ/значение. Древовидная структура означает, что ствол существует с многочисленными брэнчами, которые имеют много веток. Файловая система является хорошим примером древовидной структуры. Файловые системы имеют корневой каталог с подкаталогами, которые сами могут иметь подкаталоги и так далее.
+
+Для использования **`boost::property_tree::ptree`**, включите ***boost/property_tree/ptree.hpp***. Это главный заголовочный файл, поэтому другие заголовочные файлы не нужны для Boost.PropertyTree
+
+<a name="example251"></a>
+`Пример 25.1. Доступ к данным в boost::property_tree::ptree `
+```c++
+#include <boost/property_tree/ptree.hpp>
+#include <iostream>
+
+using boost::property_tree::ptree;
+
+int main()
+{
+  ptree pt;
+  pt.put("C:.Windows.System", "20 files");
+
+  ptree &c = pt.get_child("C:");
+  ptree &windows = c.get_child("Windows");
+  ptree &system = windows.get_child("System");
+  std::cout << system.get_value<std::string>() << '\n';
+}
+```
+
+[Пример 25.1](#example251) использует **`boost::property_tree::ptree`** для хранения пути к каталогу.Это делается с помощью вызова **`put()`**. Этот челен функции ожидает двух параметров, поскольку **`boost::property_tree::ptree`** является структурой дерева, которое сохраняет пары ключ/значение . Дерево не просто состоят из ветвей и бренчей, значение должно быть присвоено к каждой ветке и бренчу. В [примере 25,1](#example251) значение - «20 файлов».
+
+Первый параметр, передаваемый **`put()`**, является наиболее интересным. Это путь к каталогу. Однако, он не использует ***backlash***, являющимся обычным разделителем пути на Windows. Он использует точку. 
+
+Вам нужно использовать точку, потому что это Boost.PropertyTree предпологает разделитель для ключей. Параметр «C:. Windows.System» говорит ***pt*** создать ветвь под названием C: с бренчем под названием Windows, который имеет другую ветвь под названием System. Точка создает вложенную структуру ветвей. Если «C:\Windows\System» передан в качестве параметра, ***pt*** будет иметь только одна ветвь под названием C:\Windows\System. 
+
+После вызова **`put()`** ***pt*** доступен для чтения сохраненного значения «20 файлов» и записать его в стандартный вывод. Это делается путем перепрыжки с ветки на ветку или в каталог. 
+
+Для доступа к ***subbranch***, вы вызываете **`get_child()`** - возвращает ссылку на объект же типа **`get_child()`**, который был вызван. В [примере 25.1](#example251) - это ссылка на **`boost::property_tree::ptree`**. Так как каждая ветвь может иметь несколько ответвлений, и так как нет структурной разницы между высшей и низшей ветви, используется тот же тип. 
+
 <a name="Boost.Tribool"></a>
 ##Глава №27 Boost.Tribool
 
+Библиотека [Boost.Tribool]() предоставляет класс **`boost::logic::tribool`**, который похож на ***bool***. Однако в то время как ***bool*** может обработать два оператора, **`boost::logic::tribool`** обрабатывает три.
+Для использования **`boost::logic::tribool`**, включите ***boost/logic/tribool.hpp***. 
+
+<a name="example271"></a>
+`Пример 27.1. Три утверждения  boost::logic::tribool`
+```c++
+#include <boost/logic/tribool.hpp>
+#include <iostream>
+
+using namespace boost::logic;
+
+int main()
+{
+  tribool b;
+  std::cout << std::boolalpha << b << '\n';
+
+  b = true;
+  b = false;
+  b = indeterminate;
+  if (b)
+    ;
+  else if (!b)
+    ;
+  else
+    std::cout << "indeterminate\n";
+}
+```
+
+Переменной типа **`boost::logic::tribool`** может быть присвоено значение ***true***, ***false*** или ***indeterminate***. Конструктор по умолчанию инициализирует переменную в значение ***false***. Вот почему [пример 27.1](#example271) сначала записывает значение ***false***. 
+
+Оператор ***if*** в [примере 27.1](#example271) показывает, значение ***b***. Вы должны проверить его для ***true*** и ***false***. Если переменная имеет значение ***indeterminate***, как показано в примере, будет выполнен блок ***else***.
+
+Boost.Tribool также предоставляет функцию **`boost::logic::indeterminate()`**. При передаче переменной типа **`boost::logic::tribool`**, имеющее значение ***indeterminate***, эта функция возвращает ***true***. Если переменная имеет значение ***true*** или ***false***, он будет возвращать значение ***false***. 
+
+<a name="example272"></a>
+`Пример 27.2. Логические операции с boost::logic::tribool`
+```c++
+#include <boost/logic/tribool.hpp>
+#include <boost/logic/tribool_io.hpp>
+#include <iostream>
+
+using namespace boost::logic;
+
+int main()
+{
+  std::cout.setf(std::ios::boolalpha);
+
+  tribool b1 = true;
+  std::cout << (b1 || indeterminate) << '\n';
+  std::cout << (b1 && indeterminate) << '\n';
+
+  tribool b2 = false;
+  std::cout << (b2 || indeterminate) << '\n';
+  std::cout << (b2 && indeterminate) << '\n';
+
+  tribool b3 = indeterminate;
+  std::cout << (b3 || b3) << '\n';
+  std::cout << (b3 && b3) << '\n';
+}
+```
+
+Логические операторы можно использовать с переменными типа **`boost::logic::tribool`**, так же, как и с переменными типа ***bool***. На самом деле это единственный способ для переменных типа **`boost::logic::tribool`** потому, что класс не предоставляет каких-либо членов функций. 
+
+[Пример 27.2](#example272) возвращает ***true*** для ***b1 || indeterminate***, значение ***false*** для ***b2 && неопределенный*** и ***indeterminate*** во всех остальных случаях. Если вы посмотрите на операции и их результаты, вы заметите, что **`boost::logic::tribool`** ведет себя, как можно было бы ожидать интуитивно. Документация на Boost.Tribool также содержит таблицы, показывающие, какие операции приводят к каким результатам. 
+
+[Пример 27.2](#example272) также показывает, как значения ***true***, ***false*** и ***indeterminate*** записываются в стандартный вывод с переменными типа **`boost::logic::tribool`**. ***boost/logic/tribool_io.hpp***  должен быть включен и установлен флаг ***std::ios::boolalpha*** для стандартного вывода.
+
+Boost.Tribool также предоставляет макрос ***BOOST_TRIBOOL_THIRD_STATE***, который позволяет вам заменить другое значение ***indeterminate***. Например можно использовать ***dontknow*** вместо ***indeterminate***.
