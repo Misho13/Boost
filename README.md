@@ -39,7 +39,7 @@ std::cout << std::sqrt(static_cast<float>(i)) << '\n';
 **`boost::optional`** обеспечивает Boost Optional, позволяющая четко определить необязательные возвращаемые значения. 
 
 <a name="example212"></a>
-`Пример 21.2 Необязательные возвращаемые значения при помощи **`boost::optional `**`
+`Пример 21.2 Необязательные возвращаемые значения при помощи boost::optional`
 ```c++
 #include <boost/optional.hpp> 
 #include <iostream>
