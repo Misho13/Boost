@@ -62,7 +62,7 @@ if (i)    std::cout << std::sqrt(static_cast<float>(*i)) << '\n';
 }
 ```
 
-[Пример 21.2](#example212) возвращаемое значение функции **`get_even_random_number()`** имеет новый тип, **`boost::optional<int>`**. ***boost::optional*** -  шаблон, который должен быть инициализирован с фактическим типом возвращаемого значения.  
+[Пример 21.2](#example212) возвращаемое значение функции **`get_even_random_number()`** имеет новый тип, **`boost::optional<int>`**. **`boost::optional`** -  шаблон, который должен быть инициализирован с фактическим типом возвращаемого значения. ***boost/optional.hpp*** должна быть включена в **`boost::optional`**.
 ##Глава №23 Boost.Any
 ##Глава №24 Boost.Variant
 ##Глава №25 Boost.PropertyTree
