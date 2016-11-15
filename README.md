@@ -548,12 +548,6 @@ int main()
 
 Последняя функция-член, в [примере 25.4](#example254) является **`get_child_optional()`**. Эта функция используется как **`get_child()`**. **`get_child_optional()`** возвращает объект типа **`boost::optional`**. Вы вызываете **`boost::optional`**, если вы не уверены в том, существует ли ключ.
 
-<a name="Boost.Tribool"></a>
-##Глава №27 Boost.Tribool
-
-Библиотека [Boost.Tribool]() предоставляет класс **`boost::logic::tribool`**, который похож на ***bool***. Однако в то время как ***bool*** может обработать два оператора, **`boost::logic::tribool`** обрабатывает три.
-Для использования **`boost::logic::tribool`**, включите ***boost/logic/tribool.hpp***. 
-
 <a name="example255"></a>
 `Пример 25.5. Сериализация boost::property_tree::ptree в формате JSON`
 ```c++
@@ -588,6 +582,11 @@ Boost.PropertyTree больше, чем просто обеспечивают с
 
 Ни один из поддерживаемых форматов не гарантирует, что **`boost::property_tree::ptree`** будет выглядеть так же после сохранения и перезагрузки. Например формат JSON может потерять сведения о типе, потому что **`boost::property_tree::ptree`** не может различать  ***true*** и ***«true»***. Тип всегда остается тем же. Основное внимание библиотеки находится на структуре ***boost::property_tree::ptree***, а не на поддержку различных форматов данных.
 
+<a name="Boost.Tribool"></a>
+##Глава №27 Boost.Tribool
+
+Библиотека [Boost.Tribool]() предоставляет класс **`boost::logic::tribool`**, который похож на ***bool***. Однако в то время как ***bool*** может обработать два оператора, **`boost::logic::tribool`** обрабатывает три.
+Для использования **`boost::logic::tribool`**, включите ***boost/logic/tribool.hpp***. 
 
 <a name="example271"></a>
 `Пример 27.1. Три утверждения  boost::logic::tribool`
