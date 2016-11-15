@@ -420,11 +420,174 @@ int main()
 
 Для доступа к ***subbranch***, вы вызываете **`get_child()`** - возвращает ссылку на объект же типа **`get_child()`**, который был вызван. В [примере 25.1](#example251) - это ссылка на **`boost::property_tree::ptree`**. Так как каждая ветвь может иметь несколько ответвлений, и так как нет структурной разницы между высшей и низшей ветви, используется тот же тип. 
 
+Третий вызов **`get_child()`** получает **`boost::property_tree::ptree`**, который представляет каталог System. **`get_value()`** вызывается для чтения значения, которое было сохранено в начале примера с **`put()`**.
+
+Пожалуйста, обратите внимание, что **`get_value()`** является шаблон функции. Передайте тип возвращаемого значения в качестве параметра шаблона. Этот способ **`get_value()`** может сделать автоматическое преобразование типов.
+
+<a name="example252"></a>
+`Пример 25.2. Доступ к данным в basic_ptree < std::string, int >`
+```c+
+#include <boost/property_tree/ptree.hpp>
+#include <utility>
+#include <iostream>
+
+int main()
+{
+  typedef boost::property_tree::basic_ptree<std::string, int> ptree;
+  ptree pt;
+  pt.put(ptree::path_type{"C:\\Windows\\System", '\\'}, 20);
+  pt.put(ptree::path_type{"C:\\Windows\\Cursors", '\\'}, 50);
+
+  ptree &windows = pt.get_child(ptree::path_type{"C:\\Windows", '\\'});
+  int files = 0;
+  for (const std::pair<std::string, ptree> &p : windows)
+    files += p.second.get_value<int>();
+  std::cout << files << '\n';
+}
+```
+
+Есть два изменения в [примере 25.2](#example252), по сравнению с [примером 25.1](#example251). Это изменения созданы, чтобы сохранить пути к каталогам и количество файлов в них более легко. Во-первых, пути используют backslash в качестве разделителя при передаче **`put()`**. Во-вторых, число файлов хранится в виде целого числа ***int***.
+
+
+По умолчанию, Boost.PropertyTree использует точку в качестве разделителя дляключей. Если вам нужно использовать другой символ, например backslash, как разделитель, не передать ключ как строка **`put()`**. Вместо этого вы оберните его в объект типа **`boost::property_tree::ptree::path_type`**. Конструктор этого класса, который зависит от **`boost::property_tree::ptree`**, принимает ключ в качестве первого параметра и знак разделителя в качестве второго параметра. Таким образом, можно использовать путь например C:\Windows\System, как показано в [примере 25.2](#example252), без необходимости замены backslash.
+
+**`boost::property_tree::ptree`** основан на **`boost::property_tree::basic_ptree`** шаблона класса. Поскольку ключи и значения часто являются строками, **`boost::property_tree::ptree`** переопределен. Однако, можно использовать **`boost::property_tree::basic_ptree`** с различными типами для ключей и значений. Дерево в [примере 25.2](#example252) использует ***int*** для хранения числа файлов в каталоге, а не строку.
+
+**`boost::property_tree::ptree`** предоставляет член функции **`begin()`** и **`end()`**. Однако **`boost::property_tree::ptree`** только позволяет выполнять итерацию над ветвью в одном уровне. [Пример 25.2](#example252) итерацию по подкаталогам C:\Windows. Вы не можете получить итератор для перебора всех ветвей на всех уровнях.
+
+Цикл в [примере 25.2](#example252) считывает число файлов во всех подкаталогах C:\Windows для расчета в общей сложности. В результате в примере выводится ***70***. Пример не имеет прямой доступ к объектам типа ***ptree***. Вместо этого он выполняет итерацию элементов типа **`std::pair < std::string`**, **`ptree >`**. ***first*** содержит ключ текущей ветви. Это система и курсоры в [примере 25.2](#example252). ***second*** обеспечивает доступ к объекту ***ptree*** типа, который представляет возможные подкаталоги. В этом примере считываются только значения, назначенные для системы и курсоры. Как и в [примере 25.1](#example251) вызывается функция **`get_value()`**.
+
+**`boost::property_tree::ptree`** хранит только значение текущей ветви,а не его ключ. Вы можете получить значение с **`get_value()`**, но нет никакой функции для получения ключа. Ключ хранится в **`boost::property_tree::ptree`** на один уровень вверх. Это также объясняет, почему цикл выполняет итерацию элементов типа **`std::pair < std::string`**, **`ptree >`**.
+
+<a name="example253"></a>
+`Пример 25.3. Доступ к данным с переводчиком`
+```c++
+#include <boost/property_tree/ptree.hpp>
+#include <boost/optional.hpp>
+#include <iostream>
+#include <cstdlib>
+
+struct string_to_int_translator
+{
+  typedef std::string internal_type;
+  typedef int external_type;
+
+  boost::optional<int> get_value(const std::string &s)
+  {
+    char *c;
+    long l = std::strtol(s.c_str(), &c, 10);
+    return boost::make_optional(c != s.c_str(), static_cast<int>(l));
+  }
+};
+
+int main()
+{
+  typedef boost::property_tree::iptree ptree;
+  ptree pt;
+  pt.put(ptree::path_type{"C:\\Windows\\System", '\\'}, "20 files");
+  pt.put(ptree::path_type{"C:\\Windows\\Cursors", '\\'}, "50 files");
+
+  string_to_int_translator tr;
+  int files =
+    pt.get<int>(ptree::path_type{"c:\\windows\\system", '\\'}, tr) +
+    pt.get<int>(ptree::path_type{"c:\\windows\\cursors", '\\'}, tr);
+  std::cout << files << '\n';
+}
+```
+
+[Пример 25.3](#example253) использует **`boost::property_tree::iptree`** другого предопределенного дерева из Boost.PropertyTree. В общем этот тип ведет себя как **`boost::property_tree::ptree`**. Единственное отличие состоит в том что **`boost::property_tree::iptree`** не различает нижний и верхний регистр. Например значение, хранящееся с ключом C:\Windows\System можно читать с c:\windows\system.
+
+В отличие от [примера 25.1](#example251) **`get_child()`** не вызывается несколько раз для доступа отделений. Так же, как **`put()`** может использоваться для хранения значения непосредственно в подветвях, значение из подветви можно читать с **`get()`**. Ключ определяется так же, как – например, с помощью **`boost::property_tree::iptree::path_type`**.
+
+Как и  **`get_value()`** **`get()`**, является шаблоном функции. Вы должны передать тип возвращаемого значения в качестве параметра шаблона. Boost.PropertyTree выполняет автоматическое преобразование типов.
+
+[Пример 25.3](#example253) определяет переводчик **`string_to_int_translator`**, который преобразует значение типа ***std::string*** в ***int***. Переводчик передается как дополнительный параметр **`get()`**. Потому что переводчик используется только для чтения, он определяет только одну функцию-член, **`get_value()`**. Если вы хотите использовать переводчик для записи, то будет необходимо определить член функции **`put_value()`** и затем передать переводчик в качестве дополнительного параметра **`put()`**.
+
+**`get_value()`** возвращает значение типа, который используется в ***pt***. Однако поскольку преобразование типов не всегда справляются, используется **`boost::optional`**. Если значение хранится в [примере 25.3](#example253), который нельзя преобразовать в ***int*** с **`std::strtol()`**,возвращается пустой объект типа **`boost::optional`**.
+
+Пожалуйста, обратите внимание на то, что переводчик должен также определить два типа ***internal_type*** и ***external_type***. Если вам нужно конвертировать типы при хранении данных, определите **`put_value()`**, похожий на **`get_value()`**.
+
+Если изменить [пример 25.3](#example253) для хранения значения «20» вместо значения «20 файлов», **`get_value()`** может быть вызван без прохождения переводчика. Переводчики, предоставляемые Boost.PropertyTree могут конвертировать из ***std::string*** в ***int***. Однако, преобразование типа завершается успешно, только если вся строка может быть преобразованна. Строка не должна содержать буквы. Так как **`std::strtol()`** может сделать преобразование типов до тех пор, пока строка начинается с цифры, более обильный переводчик string_to_int_translator используется в [примере 25.3](#example253).
+
+<a name="example254"></a>
+`Пример 25.4. Различные члены функций boost::property_tree::ptree`
+```c++
+#include <boost/property_tree/ptree.hpp>
+#include <utility>
+#include <iostream>
+
+using boost::property_tree::ptree;
+
+int main()
+{
+  ptree pt;
+  pt.put("C:.Windows.System", "20 files");
+
+  boost::optional<std::string> c = pt.get_optional<std::string>("C:");
+  std::cout << std::boolalpha << c.is_initialized() << '\n';
+
+  pt.put_child("D:.Program Files", ptree{"50 files"});
+  pt.add_child("D:.Program Files", ptree{"60 files"});
+
+  ptree d = pt.get_child("D:");
+  for (const std::pair<std::string, ptree> &p : d)
+    std::cout << p.second.get_value<std::string>() << '\n';
+
+  boost::optional<ptree&> e = pt.get_child_optional("E:");
+  std::cout << e.is_initialized() << '\n';
+}
+```
+
+Можно вызвать функцию **`get_optional()`**, если вы хотите прочитать значение ключа, но вы не уверены, cуществует ли ключ. **`get_optional()`** возвращает значение в объект типа **`boost::optional`**. Если объект является пустым, значит ключ не был найден. В противном случае **`get_optional()`** работает так же, как **`get()`**.
+
+Может показаться, что **`put_child()`** и **`add_child()`** такие же, как **`put()`**. Разница состоит в том что **`put()`** создает только пару ключ/значение, в то время как **`put_child()`** и **`add_child()`** вставляют все поддерево. Обратите внимание, что объект типа **`boost::property_tree::ptree`** передается как второй параметр **`put_child()`** и **`add_child()`**.
+
+Разница между **`put_child()`** и **`add_child()`** в том, что **`put_child()`** обращается к ключу, если ключ уже существует, в то время как **`add_child()`** всегда вставляет новый ключ в дерево. Вот почему дерево в [примере 25.4](#example254) имеет два ключа, под названием «D:. Program Files». В зависимости от варианта использования это может ввести в заблуждение. Если дерево представляет файловую систему, не должно быть двух одинаковых путей. Вы должны избегать вставки одинаковых ключей,если вы не хотите дубликаты в дереве.
+
+[Пример 25.4](#example254) отображает значение ключей ниже «D:» в цикле ***for***. Пример записи файлов: 50 и 60 файлов на стандартный вывод, что доказывает, есть два одинаковых ключей под названием «D:. Program Files».
+
+Последняя функция-член, в [примере 25.4](#example254) является **`get_child_optional()`**. Эта функция используется как **`get_child()`**. **`get_child_optional()`** возвращает объект типа **`boost::optional`**. Вы вызываете **`boost::optional`**, если вы не уверены в том, существует ли ключ.
+
 <a name="Boost.Tribool"></a>
 ##Глава №27 Boost.Tribool
 
 Библиотека [Boost.Tribool]() предоставляет класс **`boost::logic::tribool`**, который похож на ***bool***. Однако в то время как ***bool*** может обработать два оператора, **`boost::logic::tribool`** обрабатывает три.
 Для использования **`boost::logic::tribool`**, включите ***boost/logic/tribool.hpp***. 
+
+<a name="example255"></a>
+`Пример 25.5. Сериализация boost::property_tree::ptree в формате JSON`
+```c++
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <iostream>
+
+using namespace boost::property_tree;
+
+int main()
+{
+  ptree pt;
+  pt.put("C:.Windows.System", "20 files");
+  pt.put("C:.Windows.Cursors", "50 files");
+
+  json_parser::write_json("file.json", pt);
+
+  ptree pt2;
+  json_parser::read_json("file.json", pt2);
+
+  std::cout << std::boolalpha << (pt == pt2) << '\n';
+}
+```
+
+Boost.PropertyTree больше, чем просто обеспечивают структуры для управления данными в памяти. Как видно в [примере 25.5](#example255), библиотека также предоставляет функции для сохранения **`boost::property_tree::ptree`** в файл и загрузить его из файла.
+
+***Boost/property_tree/json_parser.hpp*** обеспечивает доступ к функции **`boost::property_tree::json_parser::write_json()`** и **`boost::property_tree::json_parser::read_json()`**. Эти функции позволяют сохранять и загружать **`boost::property_tree::ptree`** сериализации в JSON формате. Таким образом, вы можете поддержатьфайлы конфигурации в формате JSON.
+
+Если вы хотите вызвать функции, которые хранят **`boost::property_tree::ptree`** в файле или загрузить его из файла, необходимо включить файлы заголовков, такие как ***boost/property_tree/json_parser.hpp***. Не достаточно только включить ***boost/property_tree/ptree.hpp***.
+
+В дополнение к функции **`boost::property_tree::json_parser::write_json()`** и **`boost::property_tree::json_parser::read_json()`** Boost.PropertyTree предоставляет функции для дополнительных форматов данных. Вы используете **`boost::property_tree::ini_parser::write_ini()`** и **`boost::property_tree::ini_parser::read_ini()`** от ***boost/property_tree/ini_parser.hpp*** для поддержки INI-файлов. С **`boost::property_tree::xml_parser::write_xml()`** и **`boost::property_tree::xml_parser::read_xml()`** из ***boost/property_tree/xml_parser.hpp*** данные можно загрузить, и они хранятся в формате XML. С **`boost::property_tree::info_parser::write_info()`** и **`boost::property_tree::info_parser::read_info()`** из ***boost/property_tree/info_parser.hpp*** можно получить доступ к другому формату, который был разработан и оптимизирован для реализации деревьев из Boost.PropertyTree.
+
+Ни один из поддерживаемых форматов не гарантирует, что **`boost::property_tree::ptree`** будет выглядеть так же после сохранения и перезагрузки. Например формат JSON может потерять сведения о типе, потому что **`boost::property_tree::ptree`** не может различать  ***true*** и ***«true»***. Тип всегда остается тем же. Основное внимание библиотеки находится на структуре ***boost::property_tree::ptree***, а не на поддержку различных форматов данных.
+
 
 <a name="example271"></a>
 `Пример 27.1. Три утверждения  boost::logic::tribool`
